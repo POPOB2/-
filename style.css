@@ -1,0 +1,32 @@
+#uploadForm{
+    width: 400px;
+    margin: 1rem auto;
+    font-size: 1.25rem;
+    padding: 1rem;
+}
+
+
+#list{
+    border-collapse: collapse;
+    box-shadow: 0 0 10px #ccc;
+    margin: 1rem auto;
+}
+
+
+/* id:list裡的img === 若#list裡有img時.. */
+#list img{  /* 非判斷, 而是擺在那, 若存在就會啟用 */
+    width: 150px;
+}
+
+
+#list td,#list th{
+    border: 1px solid #ccc;
+    padding: 0.5rem 1.1rem;
+    font-size: 1.15rem;
+}
+
+
+#list tr:hover{
+    background: lightgray;
+    transform: scale(1.1);
+}
