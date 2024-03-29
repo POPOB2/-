@@ -80,4 +80,44 @@ function dd($array){
         global $pdo; // 使用global將function外的'全域變數'帶入做使用
         return $pdo->exec("DELETE FROM `upload` WHERE `id`='$id'");
     }
+
+
+
+
+/**
+ * $table - 資料表名稱 字串型式
+ * $arg - 陣列型式
+ *        1. 如果陣列中有key值為id，則執行更新(update)的功能
+ *        2. 如果陣列中沒有key值為id，則執行新增(insert)的功能
+ */
+
+function  save($table,$arg){
+    global $pdo;
+    if(isset($arg['id'])){
+        //update
+
+        foreach($arg as $key => $value){
+
+            if($key!='id'){
+
+                $tmp[]="`$key`='$value'";
+            }
+
+        }
+        //建立更新的sql語法
+        $sql="UPDATE $table SET ".implode(" , " ,$tmp)." WHERE `id`='{$arg['id']}'";
+
+    }else{
+        //insert
+        $cols=implode("`,`",array_keys($arg));
+        $values=implode("','",$arg);
+
+        //建立新增的sql語法
+        $sql="INSERT INTO $table (`$cols`) VALUES('$values')";
+
+    }
+    
+    return $pdo->exec($sql);
+
+}
 ?>
