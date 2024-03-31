@@ -5,6 +5,12 @@
     padding: 1rem;
 }
 
+.header{
+    width: 400px;
+    margin: 1rem auto;
+    padding: 1rem;
+}
+
 
 #list{
     border-collapse: collapse;

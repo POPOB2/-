@@ -4,7 +4,7 @@ include_once "base.php";
 if(isset($_FILES['file']) && $_FILES['file']['error']==0){
     echo $_FILES['file']['tmp_name']; // 檔案上傳後的暫存位置
 
-    // fopen()==開啟檔案使其可讀取內容, 參數1:欲開啟的檔案、參數2:開啟的模式(詳見官方文件)
+    // fopen()==開啟檔案, 參數1:欲開啟的檔案、參數2:開啟的模式(詳見官方文件)
     $file=fopen($_FILES['file']['tmp_name'],'r'); // 'r'==read模式==僅讀取出內容
     // fgets()==獲取資料, 參數1:欲獲取的資料、參數2:獲取的行數
         // $str=fgets($file); 
