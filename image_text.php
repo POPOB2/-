@@ -1,5 +1,12 @@
 <?php
 include_once "base.php";
+/*
+1. 驗證碼
+2. bbox()取字串寬高
+3. 計算底圖邊框的寬高
+4. 產生畫布
+5. 畫上文字
+*/
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -55,20 +62,6 @@ if(isset($_POST)){
         
     }
     $color=$_POST['color'];
-    $dst_width=300; 
-    $dst_height=200;
-    $dst_img=imagecreatetruecolor($dst_width,$dst_height); // 產生圖片
-
-    
-
-    // imagecolorallocate()==宣告圖片顏色
-    $white=imagecolorallocate($dst_img,255,255,255);
-    $black=imagecolorallocate($dst_img,0,0,0);
-    $red=imagecolorallocate($dst_img,255,0,0); 
-    $green=imagecolorallocate($dst_img,0,255,0); 
-    $blue=imagecolorallocate($dst_img,0,0,255); 
-
-    imagefill($dst_img,0,0,$white); // 渲染圖片, 參數1:圖片、參數2&3:位置、參數4:顏色
 
     // imagestring()==將文字填入圖片, 參數1:使用的圖片、參數2:填入文字的尺寸、參數3:起點x軸、參數4:起點y軸、參數5:填入的文字、參數6:顏色
     // imagestring($dst_img,$_POST['size'],20,20,$_POST['string'],$$color); // 用$$獲取上方顏色
@@ -76,12 +69,32 @@ if(isset($_POST)){
     // 評估文字資訊
     $text_info=imagettfbbox($_POST['size'],0,realpath('./font/arial.ttf'),$gstr); // imagettfbbox()==以陣列提供產生的圖片文字, 其大小、xy位置等資訊
     dd($text_info);
-    $dst_x=0-$text_info[6];// 用產出的文字圖片, 其左上xy軸作為判斷, 供文字產出時以該xy座標使文字出現在靠齊位置
+
+    // 用產出的文字圖片, 其左上xy軸作為判斷, 供文字產出時以該xy座標使文字出現在靠齊位置
+    $dst_x=0-$text_info[6];
     $dst_y=0-$text_info[7];
+
+    // 從文字圖片尺寸中取最大減最小的寬高=文字圖片尺寸, 在該文字圖片兩側加上30px的邊框
+    $arrayW=[$text_info[0],$text_info[2],$text_info[4],$text_info[6]];
+    $arrayH=[$text_info[1],$text_info[3],$text_info[5],$text_info[7]];
+    $dst_w=max($arrayW)-min($arrayW);
+    $dst_h=max($arrayH)-min($arrayH);
+    $border=30;
+    $base_w=$dst_w+($border*2);
+    $base_h=$dst_h+($border*2);
+    $dst_img=imagecreatetruecolor($base_w,$base_h); // 依上述計算完圖片後加上邊框的值產生總圖片底圖(文字+邊框)
+
+    // imagecolorallocate()==宣告圖片顏色定義
+    $white=imagecolorallocate($dst_img,255,255,255);
+    $black=imagecolorallocate($dst_img,0,0,0);
+    $red=imagecolorallocate($dst_img,255,0,0); 
+    $green=imagecolorallocate($dst_img,0,255,0); 
+    $blue=imagecolorallocate($dst_img,0,0,255); 
+    imagefill($dst_img,0,0,$white); // 渲染圖片, 參數1:圖片、參數2&3:位置、參數4:顏色
 
     // imagettftext($dst_img,24,0,10,10,$blue,'./font/arial.ttf','ABCDE');
     // realpath()==自動從根目錄找到目前該檔案位置(看似相對路徑但實為絕對路徑)
-    imagettftext($dst_img,$_POST['size'],0,$dst_x,$dst_y,$$color,realpath('./font/arial.ttf'),$gstr); // imagettftext()==於圖像上繪製文字, 參數1:使用圖像、參數2345:
+    imagettftext($dst_img,$_POST['size'],0,($border+$dst_x),($border+$dst_y),$$color,realpath('./font/arial.ttf'),$gstr); // imagettftext()==於圖像上繪製文字, 參數1:使用圖像、參數2345:
     
     imagejpeg($dst_img,"./upload/text.jpg",100); // 輸出圖片
     imagedestroy($dst_img); // 從記憶體移除圖片相關的操作
