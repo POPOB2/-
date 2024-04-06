@@ -90,6 +90,13 @@ $border=30; // 邊框距離
     $red=imagecolorallocate($dst_img,255,0,0); 
     $green=imagecolorallocate($dst_img,0,255,0); 
     $blue=imagecolorallocate($dst_img,0,0,255); 
+    $colors=[imagecolorallocate($dst_img,255,0,0),
+             imagecolorallocate($dst_img,0,255,0),
+             imagecolorallocate($dst_img,0,0,255),
+             imagecolorallocate($dst_img,0,255,255),
+             imagecolorallocate($dst_img,255,0,255),
+             imagecolorallocate($dst_img,255,120,0),
+    ];
     imagefill($dst_img,0,0,$white); // 渲染圖片, 參數1:圖片、參數2&3:位置、參數4:顏色
 
     // imagettftext($dst_img,24,0,10,10,$blue,'./font/arial.ttf','ABCDE');
@@ -103,7 +110,7 @@ $border=30; // 邊框距離
         $left_y=rand(5,$base_h-5); 
         $right_x=rand($base_w-$border+5,$base_w-5); // 參數1:總寬(圖片本體+兩側邊框長度)-邊框長度(30)+5=終點線最低的x值 、 參數2:總寬(圖片本體+兩側邊框長度)-5=終點線最高的x值
         $right_y=rand(5,$base_h-5); // 參數1:終點線y最低為5 、 參數2:總高(圖片本體+上下邊框長度)=終點線最高的y值
-        imageline($dst_img,$left_x,$left_y,$right_x,$right_y,$red); // imageline()==畫線, 參數1:畫在哪、參數23:畫的起點xy、參數45:畫的終點xy、參數6:顏色
+        imageline($dst_img,$left_x,$left_y,$right_x,$right_y,$colors[rand(0,5)]); // imageline()==畫線, 參數1:畫在哪、參數23:畫的起點xy、參數45:畫的終點xy、參數6:顏色
     }
     
     imagejpeg($dst_img,"./upload/text.jpg",100); // 輸出圖片
