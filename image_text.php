@@ -67,19 +67,28 @@ if(isset($_POST)){
     // imagestring($dst_img,$_POST['size'],20,20,$_POST['string'],$$color); // 用$$獲取上方顏色
 
     // 評估文字資訊
-    $text_info=imagettfbbox($_POST['size'],0,realpath('./font/arial.ttf'),$gstr); // imagettfbbox()==以陣列提供產生的圖片文字, 其大小、xy位置等資訊
-    dd($text_info);
+    $text_info=[];
+    $dst_w=0;
+    $dst_h=0;
+    for($i=0; $i<mb_strlen($gstr); $i++){ // mn_strlen()==計算字串字數
+        $char=mb_substr($gstr,$i,1); // mb_substr()==擷取字串內容, 參數1:擷取的字串、參數2:從第幾個字開始、參數3:擷取幾個字
+        // $char取得每一個字做為陣列, 供imagettfbbox()產生文字圖片
+        $tmp=imagettfbbox($_POST['size'],0,realpath('./font/arial.ttf'),$char); // imagettfbbox()==以陣列提供產生的圖片文字, 其大小、xy位置等資訊
+        // 取出每個字的寬高
+        $text_info[$char]['width']=max($tmp[0],$tmp[2],$tmp[4],$tmp[6])-min($tmp[0],$tmp[2],$tmp[4],$tmp[6]);
+        $text_info[$char]['height']=max($tmp[1],$tmp[3],$tmp[5],$tmp[7])-min($tmp[1],$tmp[3],$tmp[5],$tmp[7]);
 
-    // 用產出的文字圖片, 其左上xy軸作為判斷, 供文字產出時以該xy座標使文字出現在靠齊位置
-    $dst_x=0-$text_info[6];
-    $dst_y=0-$text_info[7];
+        $dst_w+=$text_info[$char]['width'];
+        $dst_h=($dst_h>=$text_info[$char]['height'])?$dst_h:$text_info[$char]['height']; // 3元:每次迴圈判斷$dst_h變為取得的最大值
 
-    // 從文字圖片尺寸中取最大減最小的寬高=文字圖片尺寸, 在該文字圖片兩側加上30px的邊框
-    $arrayW=[$text_info[0],$text_info[2],$text_info[4],$text_info[6]];
-    $arrayH=[$text_info[1],$text_info[3],$text_info[5],$text_info[7]];
-    $dst_w=max($arrayW)-min($arrayW);
-    $dst_h=max($arrayH)-min($arrayH);
-$border=30; // 邊框距離
+        // 取出每個字的xy起始點
+        $text_info[$char]['x']=0-min($tmp[0],$tmp[2],$tmp[4],$tmp[6]);
+        $text_info[$char]['y']=0-min($tmp[1],$tmp[3],$tmp[5],$tmp[7]);
+    }
+    // dd($text_info);
+    // exit();
+
+$border=10; // 邊框距離
     $base_w=$dst_w+($border*2);
     $base_h=$dst_h+($border*2);
     $dst_img=imagecreatetruecolor($base_w,$base_h); // 依上述計算完圖片後加上邊框的值產生總圖片底圖(文字+邊框)
@@ -99,12 +108,19 @@ $border=30; // 邊框距離
     ];
     imagefill($dst_img,0,0,$white); // 渲染圖片, 參數1:圖片、參數2&3:位置、參數4:顏色
 
-    // imagettftext($dst_img,24,0,10,10,$blue,'./font/arial.ttf','ABCDE');
-    // realpath()==自動從根目錄找到目前該檔案位置(看似相對路徑但實為絕對路徑)
-    imagettftext($dst_img,$_POST['size'],0,($border+$dst_x),($border+$dst_y),$$color,realpath('./font/arial.ttf'),$gstr); // imagettftext()==於圖像上繪製文字, 參數1:使用圖像、參數2345:
+    
+    $x_pointer=$border; // 累積的x軸, 須從$border值開始算
+    $y_pointer=$border; 
+    foreach($text_info as $char => $info){
+        // 參數3 : 從累計的字寬x繼續向下
+        imagettftext($dst_img,$_POST['size'],0,$x_pointer,$y_pointer+$info['y'],$colors[rand(0,5)],realpath('./font/arial.ttf'),$char); // imagettftext()==於圖像上繪製文字, 參數1:使用圖像、參數2345:
+        // 每次獲得新的字就會多一段x的寬, 累計後作為下一個字的寬度向後使用
+        $x_pointer+=$info['width'];
+    }
 
     // 圖形驗證干擾線
     $lines=rand(4,6);
+    
     for($i=0; $i<$lines; $i++){
         $left_x=rand(5,$border-5); // 隨機5~25作為x軸起點
         $left_y=rand(5,$base_h-5); 
