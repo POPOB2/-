@@ -27,13 +27,6 @@ include_once "base.php";
         <div>
             文字尺寸 : <input type="number" name="size" step="1" value="24">
         </div>
-        <div>
-            <select name="color" id="">
-                <option value="red">紅</option>
-                <option value="green">綠</option>
-                <option value="blue">藍</option>
-            </select>
-        </div>
         <input type="submit" value="產生驗證碼">
     </form>
  
@@ -61,7 +54,6 @@ if(isset($_POST)){
         }
         
     }
-    $color=$_POST['color'];
 
     // imagestring()==將文字填入圖片, 參數1:使用的圖片、參數2:填入文字的尺寸、參數3:起點x軸、參數4:起點y軸、參數5:填入的文字、參數6:顏色
     // imagestring($dst_img,$_POST['size'],20,20,$_POST['string'],$$color); // 用$$獲取上方顏色
@@ -72,8 +64,13 @@ if(isset($_POST)){
     $dst_h=0;
     for($i=0; $i<mb_strlen($gstr); $i++){ // mn_strlen()==計算字串字數
         $char=mb_substr($gstr,$i,1); // mb_substr()==擷取字串內容, 參數1:擷取的字串、參數2:從第幾個字開始、參數3:擷取幾個字
+
+        // 隨機-15~15用於文字角度
+        $text_info[$char]['angle']=rand(-15,15);
+
         // $char取得每一個字做為陣列, 供imagettfbbox()產生文字圖片
-        $tmp=imagettfbbox($_POST['size'],0,realpath('./font/arial.ttf'),$char); // imagettfbbox()==以陣列提供產生的圖片文字, 其大小、xy位置等資訊
+        $tmp=imagettfbbox($_POST['size'],$text_info[$char]['angle'],realpath('./font/arial.ttf'),$char); // imagettfbbox()==以陣列提供產生的圖片文字, 其大小、xy位置等資訊
+
         // 取出每個字的寬高
         $text_info[$char]['width']=max($tmp[0],$tmp[2],$tmp[4],$tmp[6])-min($tmp[0],$tmp[2],$tmp[4],$tmp[6]);
         $text_info[$char]['height']=max($tmp[1],$tmp[3],$tmp[5],$tmp[7])-min($tmp[1],$tmp[3],$tmp[5],$tmp[7]);
@@ -95,10 +92,7 @@ $border=10; // 邊框距離
 
     // imagecolorallocate()==宣告圖片顏色定義
     $white=imagecolorallocate($dst_img,255,255,255);
-    $black=imagecolorallocate($dst_img,0,0,0);
-    $red=imagecolorallocate($dst_img,255,0,0); 
-    $green=imagecolorallocate($dst_img,0,255,0); 
-    $blue=imagecolorallocate($dst_img,0,0,255); 
+
     $colors=[imagecolorallocate($dst_img,255,0,0),
              imagecolorallocate($dst_img,0,255,0),
              imagecolorallocate($dst_img,0,0,255),
@@ -112,8 +106,9 @@ $border=10; // 邊框距離
     $x_pointer=$border; // 累積的x軸, 須從$border值開始算
     $y_pointer=$border; 
     foreach($text_info as $char => $info){
+        $y=rand($base_h-5-$dst_h+($info['y']/2),$base_h-5);
         // 參數3 : 從累計的字寬x繼續向下
-        imagettftext($dst_img,$_POST['size'],0,$x_pointer,$y_pointer+$info['y'],$colors[rand(0,5)],realpath('./font/arial.ttf'),$char); // imagettftext()==於圖像上繪製文字, 參數1:使用圖像、參數2345:
+        imagettftext($dst_img,$_POST['size'],$text_info[$char]['angle'],$x_pointer,$y,$colors[rand(0,5)],realpath('./font/arial.ttf'),$char); // imagettftext()==於圖像上繪製文字, 參數1:使用圖像、參數2345:
         // 每次獲得新的字就會多一段x的寬, 累計後作為下一個字的寬度向後使用
         $x_pointer+=$info['width'];
     }
