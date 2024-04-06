@@ -79,7 +79,7 @@ if(isset($_POST)){
     $arrayH=[$text_info[1],$text_info[3],$text_info[5],$text_info[7]];
     $dst_w=max($arrayW)-min($arrayW);
     $dst_h=max($arrayH)-min($arrayH);
-    $border=30;
+$border=30; // 邊框距離
     $base_w=$dst_w+($border*2);
     $base_h=$dst_h+($border*2);
     $dst_img=imagecreatetruecolor($base_w,$base_h); // 依上述計算完圖片後加上邊框的值產生總圖片底圖(文字+邊框)
@@ -95,6 +95,16 @@ if(isset($_POST)){
     // imagettftext($dst_img,24,0,10,10,$blue,'./font/arial.ttf','ABCDE');
     // realpath()==自動從根目錄找到目前該檔案位置(看似相對路徑但實為絕對路徑)
     imagettftext($dst_img,$_POST['size'],0,($border+$dst_x),($border+$dst_y),$$color,realpath('./font/arial.ttf'),$gstr); // imagettftext()==於圖像上繪製文字, 參數1:使用圖像、參數2345:
+
+    // 圖形驗證干擾線
+    $lines=rand(4,6);
+    for($i=0; $i<$lines; $i++){
+        $left_x=rand(5,$border-5); // 隨機5~25作為x軸起點
+        $left_y=rand(5,$base_h-5); 
+        $right_x=rand($base_w-$border+5,$base_w-5); // 參數1:總寬(圖片本體+兩側邊框長度)-邊框長度(30)+5=終點線最低的x值 、 參數2:總寬(圖片本體+兩側邊框長度)-5=終點線最高的x值
+        $right_y=rand(5,$base_h-5); // 參數1:終點線y最低為5 、 參數2:總高(圖片本體+上下邊框長度)=終點線最高的y值
+        imageline($dst_img,$left_x,$left_y,$right_x,$right_y,$red); // imageline()==畫線, 參數1:畫在哪、參數23:畫的起點xy、參數45:畫的終點xy、參數6:顏色
+    }
     
     imagejpeg($dst_img,"./upload/text.jpg",100); // 輸出圖片
     imagedestroy($dst_img); // 從記憶體移除圖片相關的操作
